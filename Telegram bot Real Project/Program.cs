@@ -1,4 +1,5 @@
 
+using System.Net;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram_bot_Real_Project.Interfaces;
@@ -13,8 +14,9 @@ namespace Telegram_bot_Real_Project
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddHttpClient<IWikipediaService, WikipediaService>();
             builder.Services.AddSingleton<IUpdateHandler,MessageHandler>();
+            builder.Services.AddSingleton<WebClient>();
+            builder.Services.AddHttpClient();
             TelegramBotClient client = new TelegramBotClient("6824038704:AAFuVOS7wJlKsCTAkJtVrqZSZXCOhPZQpwI");
             client.StartReceiving(new MessageHandler());
             builder.Services.AddSingleton(client);
