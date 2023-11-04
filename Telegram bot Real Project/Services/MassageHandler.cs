@@ -32,7 +32,6 @@ public class MessageHandler : IUpdateHandler
     }
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        WebClient _webClient = new WebClient();
         if (update.Type == UpdateType.Message && update.Message.Type == MessageType.Text)
         {
             try
@@ -41,37 +40,42 @@ public class MessageHandler : IUpdateHandler
                 string Sendermessage = null;
                 string userQuery = update.Message.Text;
                 string apiUrl = $"http://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles={userQuery.Replace(" ", "%30")}";
-                string response = _webClient.DownloadString(apiUrl);
-                var wikipediaResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<WikipediaResponse>(response);
-                if (wikipediaResponse != null && wikipediaResponse.Query != null && wikipediaResponse.Query.Pages != null)
+
+                using (WebClient webClient = new WebClient())
                 {
-                    var firstPage = wikipediaResponse.Query.Pages.Values.First();
-                    if (firstPage != null)
+                    string response = webClient.DownloadString(apiUrl);
+                    var wikipediaResponse = JsonConvert.DeserializeObject<WikipediaResponse>(response);
+
+                    if (wikipediaResponse != null && wikipediaResponse.Query != null && wikipediaResponse.Query.Pages != null)
                     {
-                        string title = firstPage.Title;
-                        string extract = firstPage.Extract;
+                        var firstPage = wikipediaResponse.Query.Pages.Values.First();
+                        if (firstPage != null)
+                        {
+                            string title = firstPage.Title;
+                            string extract = firstPage.Extract;
 
-                        extract = RemoveHtmlElements(extract);
+                            extract = RemoveHtmlElements(extract);
 
-                        Sendermessage = (extract);
+                            Sendermessage = (extract);
+                        }
+                        else
+                        {
+                            Sendermessage = "No information found for the given query.";
+                        }
                     }
                     else
                     {
                         Sendermessage = "No information found for the given query.";
                     }
                 }
-                else
+
+                if (string.IsNullOrEmpty(Sendermessage))
                 {
                     Sendermessage = "No information found for the given query.";
                 }
-
-                if (string.IsNullOrEmpty(Sendermessage)) 
-                {
-                    Sendermessage = "No information found for the given query."; 
-                }
                 else
                 {
-                    Sendermessage = ($"Information about {update.Message.Text} :{Sendermessage}");
+                    Sendermessage = $"Information about {update.Message.Text}: {Sendermessage}";
                 }
 
                 Console.WriteLine($"Received message from user {userId}: {userQuery}");
@@ -83,6 +87,7 @@ public class MessageHandler : IUpdateHandler
             }
         }
     }
+
 
     static string RemoveHtmlElements(string input)
     {
