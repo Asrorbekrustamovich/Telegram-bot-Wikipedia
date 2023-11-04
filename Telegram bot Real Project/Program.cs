@@ -16,7 +16,11 @@ namespace Telegram_bot_Real_Project
             builder.Services.AddHttpClient<IWikipediaService, WikipediaService>();
             builder.Services.AddSingleton<IUpdateHandler,MessageHandler>();
             TelegramBotClient client = new TelegramBotClient("6824038704:AAFuVOS7wJlKsCTAkJtVrqZSZXCOhPZQpwI");
-            client.StartReceiving(new MessageHandler());
+
+            var serviceProv = builder.Services.BuildServiceProvider();
+            var messageHandler = new MessageHandler(serviceProv.GetRequiredService<IWikipediaService>());
+
+            client.StartReceiving(messageHandler);
             builder.Services.AddSingleton(client);
             //builder.Services.AddSingleton(new TelegramBotClient("6824038704:AAFuVOS7wJlKsCTAkJtVrqZSZXCOhPZQpwI"));
             var app = builder.Build();

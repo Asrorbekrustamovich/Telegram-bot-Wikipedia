@@ -11,22 +11,21 @@ using Newtonsoft.Json;
 
 public class MessageHandler : IUpdateHandler
 {
-    private readonly ITelegramBotClient _telegramBotClient;
+    
     private readonly IWikipediaService _wikipediaService;
 
     public MessageHandler()
     {
     }
 
-    public MessageHandler(ITelegramBotClient telegramBotClient, IWikipediaService wikipediaService)
+    public MessageHandler( IWikipediaService wikipediaService)
     {
-        _telegramBotClient = telegramBotClient;
         _wikipediaService = wikipediaService;
     }
 
     public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        // Handle polling errors if necessary
+       
     }
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -38,7 +37,7 @@ public class MessageHandler : IUpdateHandler
 
             Console.WriteLine($"Received message from user {userId}: {userQuery}");
 
-            string wikipediaSummary = await _wikipediaService.GetWikipediaSummaryAsync(userQuery);
+            string wikipediaSummary =await _wikipediaService.GetWikipediaSummaryAsync(userQuery);
             await botClient.SendTextMessageAsync(userId, wikipediaSummary);
         }
     }
