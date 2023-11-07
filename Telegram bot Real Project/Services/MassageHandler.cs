@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -21,17 +18,17 @@ public class MessageHandler : IUpdateHandler
 
     public async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        // Handle polling errors if needed
+       
     }
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Type == UpdateType.Message && update.Message.Type == MessageType.Text)
-        {  
+        {
             var userId = update.Message.Chat.Id;
             string userQuery = update.Message.Text;
             int count = 0;
-            if (update.Message.Text == "/start"|| update.Message.Text=="English"|| update.Message.Text=="Russian"|| update.Message.Text=="Uzbek")
+            if (update.Message.Text == "/start" || update.Message.Text == "English" || update.Message.Text == "Russian" || update.Message.Text == "Uzbek")
             {
                 _userLanguages.Remove(userId);
             }
@@ -40,9 +37,9 @@ public class MessageHandler : IUpdateHandler
                 string wikipediaSummary = await _wikipediaService.GetWikipediaSummaryAsync(userQuery, language);
                 botClient.SendTextMessageAsync(chatId: userId, text: wikipediaSummary);
             }
-            
 
-            else 
+
+            else
             {
                 string lowerUserQuery = userQuery.ToLower();
                 if (lowerUserQuery == "uzbek" || lowerUserQuery == "english" || lowerUserQuery == "russian")
@@ -51,7 +48,7 @@ public class MessageHandler : IUpdateHandler
                     string languageMessage = $"You have selected '{lowerUserQuery}'. Please enter your query.";
                     botClient.SendTextMessageAsync(chatId: userId, text: languageMessage);
                 }
-                else if(lowerUserQuery =="/start")
+                else if (lowerUserQuery == "/start")
                 {
                     string forStartingMessage = "Hello, please select a language: 'Uzbek', 'English', or 'Russian'.";
                     var replyMarkup = new ReplyKeyboardMarkup(new[]
@@ -61,11 +58,11 @@ public class MessageHandler : IUpdateHandler
                         new KeyboardButton("Russian")
                     });
                     botClient.SendTextMessageAsync(chatId: userId, text: forStartingMessage, replyMarkup: replyMarkup);
-                    
+
                 }
-               
+
             }
-           
+
         }
     }
 }
