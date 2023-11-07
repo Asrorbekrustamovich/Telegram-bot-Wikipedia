@@ -2,6 +2,6 @@
 {
     public interface IWikipediaService
     {
-       Task <string> GetWikipediaSummaryAsync(string query);
+       Task <string> GetWikipediaSummaryAsync(string query,string language);
     }
 }

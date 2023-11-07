@@ -12,16 +12,15 @@ public class WikipediaService : IWikipediaService
 
     public WikipediaService(HttpClient httpClient)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
-    public async Task<string> GetWikipediaSummaryAsync(string query)
+    public async Task<string> GetWikipediaSummaryAsync(string query, string language)
     {
-        HttpClient client = new HttpClient();
         try
         {
-            string apiUrl = $"http://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles={WebUtility.UrlEncode(query)}";
-            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            string apiUrl = $"http://{language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&titles={WebUtility.UrlEncode(query)}";
+            HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -33,14 +32,23 @@ public class WikipediaService : IWikipediaService
                 if (firstPage != null)
                 {
                     string extract = RemoveHtmlTags(firstPage.Extract);
-                    return($"Extract: {extract}");
+                   if(extract != null)
+                    {
+                        return extract;
+                    }
+                   else
+                    {
+                        return "No information found for the given query.";
+                    }
                 }
+                
             }
-                return ("No information found for the given query.");
+            
+            return "No information found for the given query.";
         }
         catch (Exception ex)
         {
-            return($"Error occurred: {ex.Message}");
+            return $"something went wrong or not found";
         }
     }
 
